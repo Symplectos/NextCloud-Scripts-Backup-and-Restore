@@ -78,7 +78,7 @@ if [ "$useCompression" = true ] ; then
     fnBackupDataDirectory='nextcloud-data-directory.tar.gz'
 fi
 
-fnBackupDB='nextcloud-db.sql'
+fnBackupDB='nextcloud-db.dump'
 
 ########################################################################################################################
 # CHECKS ###############################################################################################################
