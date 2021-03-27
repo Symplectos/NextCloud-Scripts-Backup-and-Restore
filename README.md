@@ -1,10 +1,12 @@
 # Backup and Restore NextCloud Instances
 The two bash scripts in this repository can be used to back up or restore a [NextCloud](https://nextcloud.com/) instance. They were inspired by [DetaTec](https://codeberg.org/DecaTec/Nextcloud-Backup-Restore). The main differences are the use of [EncPass](/bell0bytes/scripts/encpass) to hide secrets, and the replacement of **ls** calls by the **find** command, thus simplifying the code to remove old backups.
+The repository is maintained on [GitLab](https://gitlab.com/Symplectos/nextcloud-scripts-backup-and-restore), and mirrored on [GitHub](https://github.com/Symplectos/NextCloud-Scripts-Backup-and-Restore).
+
 
 The scripts must be configured by defining a few variables in the **VARIABLES** sections.
 
 ## NextCloud Directories and Database Type
-To backup/restore a NextCloud instance, two directories and a database must be backed up or restored. Those values can be set in the **VARIABLES** section of the scripts, i.e.
+To back up/restore a NextCloud instance, two directories and a database must be backed up or restored. Those values can be set in the **VARIABLES** section of the scripts, i.e.
 
 ```bash
 # specify the location of the nextcloud installation directory
@@ -26,7 +28,7 @@ This is the working or data directory of NextCloud. The default is set to **/hom
 #### NextCloud Database
 To dump the NextCloud database, and to import that dump again, later on, the script needs to know which database is used. The default is set to **postgresql**, i.e. a PostgreSQL database is used.
 
-**Warning**: The script assumes that the database was created with **UTF-8** supprt.
+**Warning**: The script assumes that the database was created with **UTF-8** support.
 
 ## Secrets and EncPass
 To avoid storing secrets in a script, most bell0bytes scripts use [EncPass](/bell0bytes/scripts/encpass).
