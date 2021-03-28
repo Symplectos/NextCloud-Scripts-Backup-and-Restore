@@ -1,7 +1,6 @@
 # Backup and Restore NextCloud Instances
-The two bash scripts in this repository can be used to back up or restore a [NextCloud](https://nextcloud.com/) instance. They were inspired by [DetaTec](https://codeberg.org/DecaTec/Nextcloud-Backup-Restore). The main differences are the use of [EncPass](/bell0bytes/scripts/encpass) to hide secrets, and the replacement of **ls** calls by the **find** command, thus simplifying the code to remove old backups.
+The two bash scripts in this [repository](https://github.com/Symplectos/NextCloud-Scripts-Backup-and-Restore) can be used to back up or restore a [NextCloud](https://nextcloud.com/) instance. They were inspired by [DetaTec](https://codeberg.org/DecaTec/Nextcloud-Backup-Restore). The main differences are the use of [EncPass](https://bell0bytes.eu/bell0bytes/scripts/encpass) to hide secrets, and the replacement of **ls** calls by the **find** command, thus simplifying the code to remove old backups.
 The repository is maintained on [GitLab](https://gitlab.com/Symplectos/nextcloud-scripts-backup-and-restore), and mirrored on [GitHub](https://github.com/Symplectos/NextCloud-Scripts-Backup-and-Restore).
-
 
 The scripts must be configured by defining a few variables in the **VARIABLES** sections.
 
@@ -59,7 +58,19 @@ sudo encpass.sh add nextcloud dbUser
 sudo encpass.sh add nextcloud dbPassword
 ```
 
-**Note**: Since the backup script must be run as root, the EncPass secrets must also be created for the root user, hence the use of sudo.
+**Note**: Since the backup script must be run as root, the EncPass secrets must also be created for the root user, hence the use of sudo. Make sure that the EncPass scripts are available in the **/bin** directory.
+
+### PostgreSQL Password
+When using a PostgreSQL database, the script assumes a **.pgpass** file to exist in the root home folder, with at least the following information for the database to be backed up, and the user to connect to the database to:
+
+```
+hostname:port:database:username:password
+
+localhost:5432:nextcloud:nextcloud:***
+```
+
+**Note**: The file must have **0600** permissions.
+
 
 ## Further Configuration
 The following variables should be set to adapt the script to the environment in question.
@@ -116,7 +127,7 @@ sudo ./nextcloudBackup.sh
 Creating a backup of the NextCloud instance ...
 
 Backup Directory: /mnt/backup/nextcloud
-Backup Date: 20210327_200514
+Backup Date: 20210328_101838
 
 
 Maintenance mode enabled
@@ -129,23 +140,50 @@ Restarting the web server ... done
 
 Maintenance mode disabled
 
-Removing old backups ...
-
-removed '/mnt/backup/nextcloud/20210327_200421/nextcloud-installation-directory.tar'
-removed '/mnt/backup/nextcloud/20210327_200421/nextcloud-data-directory.tar'
-removed '/mnt/backup/nextcloud/20210327_200421/nextcloud-db.sql'
-removed directory '/mnt/backup/nextcloud/20210327_200421'
 
 The Backup of the NextCloud instance was successful!
 
-Created Backup: /mnt/backup/nextcloud/20210327_200514/
+Created Backup: /mnt/backup/nextcloud/20210328_101838/
 This Backup can now be assimilated by the Borg!
 ```
 
 To restore this backup, the **20210327_200514** should be given as a parameter to the restore script:
 
 ```
-sudo ./nextcloudRestore.sh 20210327_200514
+sudo ./nextcloudRestore.sh 20210328_101838
+
+Restoring Backup: /mnt/backup/nextcloud/20210328_101838
+
+Maintenance mode enabled
+Stopping the web server ... done
+Deleting the old NextCloud installation directory ... done
+Deleting the old NextCloud data directory ... done
+Restoring the NextCloud installation directory ... done
+Restoring the NextCloud data directory ... done
+
+Dropping the old NextCloud DB ...
+DROP DATABASE
+Done
+
+Creating the new NextCloud DB ...
+CREATE DATABASE
+Done
+
+Importing the DB dump into the new DB ...
+...
+Done
+
+Restarting the web server ... done
+Chowning the correct directory permissions ... done
+Updating the System Data-Fingerprint ...
+Nextcloud is in maintenance mode - no apps have been loaded
+
+Done
+
+Maintenance mode disabled
+
+Done: The Backup 20210328_101838 was successfully restored!
+
 ```
 
 # References

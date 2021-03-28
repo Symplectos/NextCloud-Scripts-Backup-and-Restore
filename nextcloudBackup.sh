@@ -23,7 +23,7 @@
 # INCLUDES #############################################################################################################
 ########################################################################################################################
 
-# use the encpass script to securily store secrets
+# use the encpass script to securely store secrets
 . encpass-lite.sh
 
 ########################################################################################################################
@@ -159,9 +159,9 @@ echo " done"
 echo -n "Creating backup of the NextCloud installation directory ..."
 
 if [ "$useCompression" = true ]; then
-  tar -cpzf "${backupDirectory}/${fnBackupInstallationDirectory}" -C "${nextcloudInstallationDirectory}" .
+  tar --create --preserve-permissions --gzip --file="${backupDirectory}/${fnBackupInstallationDirectory}" --directory="${nextcloudInstallationDirectory}" .
 else
-  tar -cpf "${backupDirectory}/${fnBackupInstallationDirectory}" -C "${nextcloudInstallationDirectory}" .
+  tar --create --preserve-permissions --file="${backupDirectory}/${fnBackupInstallationDirectory}" --directory="${nextcloudInstallationDirectory}" .
 fi
 
 echo " done"
@@ -170,9 +170,9 @@ echo " done"
 echo -n "Creating backup of the NextCloud data directory ..."
 
 if [ "$useCompression" = true ]; then
-  tar -cpzf "${backupDirectory}/${fnBackupDataDirectory}" -C "${nextcloudDataDirectory}" .
+  tar --create --preserve-permissions --gzip --file="${backupDirectory}/${fnBackupDataDirectory}" --directory="${nextcloudDataDirectory}" .
 else
-  tar -cpf "${backupDirectory}/${fnBackupDataDirectory}" -C "${nextcloudDataDirectory}" .
+  tar --create --preserve-permissions --file="${backupDirectory}/${fnBackupDataDirectory}" --directory="${nextcloudDataDirectory}" .
 fi
 
 echo " done"
@@ -197,7 +197,7 @@ elif [ "${database,,}" = "postgresql" ] || [ "${database,,}" = "pgsql" ]; then
     errorecho "Critical Error: PostgreSQL not installed (command pg_dump not found)!"
     errorecho "Critical Error: Unable to dump the NextCloud DB!"
   else
-    PGPASSWORD="${nextcloudDBPassword}" pg_dump "${nextcloudDB}" -h localhost -U "${nextcloudDBUser}" -f "${backupDirectory}/${fnBackupDB}"
+    pg_dump --host=localhost --port=5432 --dbname="${nextcloudDB}" --username="${nextcloudDBUser}" --no-password --file="${backupDirectory}/${fnBackupDB}"
   fi
 
   echo " done"

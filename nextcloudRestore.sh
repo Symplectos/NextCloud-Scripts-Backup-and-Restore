@@ -58,7 +58,7 @@ nextcloudInstallationDirectory='/var/www/nextcloud'
 nextcloudDataDirectory='/home/nextcloud/data'
 
 # define whether to use compression or not (see notes above)
-useCompression=true
+useCompression=false
 
 # specify the name of the web server or reverse proxy user
 webServerService='nginx'
@@ -145,7 +145,7 @@ echo " done"
 
 
 # delete old installation directory
-echo "Deleting the old NextCloud installation directory ..."
+echo -n "Deleting the old NextCloud installation directory ..."
 rm -r "${nextcloudInstallationDirectory}"
 mkdir -p "${nextcloudInstallationDirectory}"
 echo " done"
@@ -161,9 +161,9 @@ echo " done"
 echo -n "Restoring the NextCloud installation directory ..."
 
 if [ "$useCompression" = true ] ; then
-    tar -xmpzf "${restorationDirectory}/${fnBackupInstallationDirectory}" -C "${nextcloudInstallationDirectory}"
+    tar --extract --touch --preserve-permissions --gunzip --file="${restorationDirectory}/${fnBackupInstallationDirectory}" --directory="${nextcloudInstallationDirectory}"
 else
-    tar -xmpf "${restorationDirectory}/${fnBackupInstallationDirectory}" -C "${nextcloudInstallationDirectory}"
+    tar --extract --touch --preserve-permissions --file="${restorationDirectory}/${fnBackupInstallationDirectory}" --directory="${nextcloudInstallationDirectory}"
 fi
 
 echo " done"
@@ -172,43 +172,48 @@ echo " done"
 echo -n "Restoring the NextCloud data directory ..."
 
 if [ "$useCompression" = true ] ; then
-    tar -xmpzf "${restorationDirectory}/${fnBackupDataDirectory}" -C "${nextcloudDataDirectory}"
+    tar --extract --touch --preserve-permissions --gunzip --file="${restorationDirectory}/${fnBackupDataDirectory}" --directory="${nextcloudDataDirectory}"
 else
-    tar -xmpf "${restorationDirectory}/${fnBackupDataDirectory}" -C "${nextcloudDataDirectory}"
+    tar --extract --touch --preserve-permissions --file="${restorationDirectory}/${fnBackupDataDirectory}" --directory="${nextcloudDataDirectory}"
 fi
 
 echo " done"
+echo
 
 # restore the DB
-echo -n "Dropping the old NextCloud DB ..."
+echo "Dropping the old NextCloud DB ..."
 
 if [ "${database,,}" = "mysql" ] || [ "${database,,}" = "mariadb" ]; then
     mysql -h localhost -u "${nextcloudDBUser}" -p"${nextcloudDBPassword}" -e "DROP DATABASE ${nextcloudDB}"
 elif [ "${database,,}" = "postgresql" ]; then
-    sudo -u postgres psql -c "DROP DATABASE ${nextcloudDB};"
+    sudo -u postgres psql --command="DROP DATABASE ${nextcloudDB};"
 fi
 
-echo " done"
+echo "Done"
+echo
 
-echo -n "Creating the new NextCloud DB ..."
+echo "Creating the new NextCloud DB ..."
 
 if [ "${database,,}" = "mysql" ] || [ "${database,,}" = "mariadb" ]; then
     mysql -h localhost -u "${nextcloudDBUser}" -p"${nextcloudDBPassword}" -e "CREATE DATABASE ${nextcloudDB} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
 elif [ "${database,,}" = "postgresql" ] || [ "${database,,}" = "pgsql" ]; then
-    sudo -u postgres psql -c "CREATE DATABASE ${nextcloudDB} WITH OWNER ${nextcloudDBUser} TEMPLATE template0 ENCODING \"UTF8\";"
+    sudo -u postgres psql --command="CREATE DATABASE ${nextcloudDB} WITH OWNER ${nextcloudDBUser} TEMPLATE template0 ENCODING \"UTF8\";"
 fi
 
-echo " done"
+echo "Done"
+echo
 
 echo "Importing the DB dump into the new DB ..."
 
 if [ "${database,,}" = "mysql" ] || [ "${database,,}" = "mariadb" ]; then
     mysql -h localhost -u "${nextcloudDBUser}" -p"${nextcloudDBPassword}" "${nextcloudDB}" < "${restorationDirectory}/${fnBackupDB}"
 elif [ "${database,,}" = "postgresql" ] || [ "${database,,}" = "pgsql" ]; then
-    psql -U"${nextcloudDBUser}" "${nextcloudDB}" < "${restorationDirectory}/${fnBackupDB}"
+    # ignoring SC2002 on purpose here
+    cat "${restorationDirectory}/${fnBackupDB}" | sudo -u postgres psql "${nextcloudDB}"
 fi
 
-echo " done"
+echo "Done"
+echo
 
 # restart the web server
 echo -n "Restarting the web server ..."
@@ -222,9 +227,9 @@ chown -R "${webServerUser}":"${webServerUser}" "${nextcloudDataDirectory}"
 echo " done"
 
 # update the system data fingerprint (see https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/occ_command.html#maintenance-commands-label)
-echo -n "Updating the System Data-Fingerprint ..."
+echo "Updating the System Data-Fingerprint ..."
 sudo -u "${webServerUser}" php ${nextcloudInstallationDirectory}/occ maintenance:data-fingerprint
-echo " done"
+echo "Done"
 echo
 
 # disable maintenance mode
