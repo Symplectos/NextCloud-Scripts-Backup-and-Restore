@@ -1,6 +1,6 @@
 # Backup and Restore NextCloud Instances
 The two bash scripts in this [repository](https://github.com/Symplectos/NextCloud-Scripts-Backup-and-Restore) can be used to back up or restore a [NextCloud](https://nextcloud.com/) instance. They were inspired by [DetaTec](https://codeberg.org/DecaTec/Nextcloud-Backup-Restore). The main differences are the use of [EncPass](https://bell0bytes.eu/bell0bytes/scripts/encpass) to hide secrets, and the replacement of **ls** calls by the **find** command, thus simplifying the code to remove old backups.
-The repository is maintained on [GitLab](https://gitlab.com/Symplectos/nextcloud-scripts-backup-and-restore), and mirrored on [GitHub](https://github.com/Symplectos/NextCloud-Scripts-Backup-and-Restore).
+The repository is maintained on [Codeberg](https://codeberg.org).
 
 The scripts must be configured by defining a few variables in the **VARIABLES** sections.
 
